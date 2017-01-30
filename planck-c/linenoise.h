@@ -103,6 +103,8 @@ void linenoiseSetKeymapEntry(int action, char key);
 #define KM_ESC 16
 #define KM_BACKSPACE 17
 #define KM_REVERSE_I_SEARCH 18
+#define KM_CANCEL_SEARCH 19
+#define KM_FINISH_SEARCH 20
 
 #ifdef __cplusplus
 }

@@ -180,7 +180,10 @@ static char keymap[] = {
         23, // KM_DELETE_PREVIOUS_WORD
         27, // KM_ESC
         127, // KM_BACKSPACE
-        18  // KM_REVERSE_I_SEARCH
+        18, // KM_REVERSE_I_SEARCH
+        7,  // KM_CANCEL_SEARCH
+        10  // KM_FINISH_SEARCH
+
 };
 
 void linenoiseSetKeymapEntry(int action, char key) {
@@ -960,7 +963,7 @@ static int linenoiseEdit(int stdin_fd, int stdout_fd, char *buf, size_t buflen, 
                     //was: c = fd_read(current);
                     nread = read(l.ifd, &c, 1);
                     // TODO check nread
-                    if (/*c == ctrl('H') || */c == keymap[KM_ESC]) {
+                    if (/*c == ctrl('H') || */c == keymap[KM_DELETE]) {
                         if (rchars) {
                             // was: int p = utf8_index(rbuf, --rchars);
                             int p = --rchars;
@@ -969,11 +972,7 @@ static int linenoiseEdit(int stdin_fd, int stdout_fd, char *buf, size_t buflen, 
                         }
                         continue;
                     }
-#ifdef USE_TERMIOS
-                    if (c == 27) {
-                        c = check_special(current->fd);
-                    }
-#endif
+
                     if (c == keymap[KM_HISTORY_PREVIOUS]) {
                         /* Search for the previous (earlier) match */
                         if (searchpos > 0) {
@@ -1018,7 +1017,7 @@ static int linenoiseEdit(int stdin_fd, int stdout_fd, char *buf, size_t buflen, 
                             /* Copy the matching line and set the cursor position */
                             set_current(&l, history[searchpos]);
                             // was: current->pos = utf8_strlen(history[searchpos], p - history[searchpos]);
-                            l.pos = strlen(history[searchpos]);
+                            l.pos = p - history[searchpos];
                             break;
                         }
                     }
@@ -1029,12 +1028,14 @@ static int linenoiseEdit(int stdin_fd, int stdout_fd, char *buf, size_t buflen, 
                         rbuf[rlen] = 0;
                     }
                 }
-                if (/*c == keymap[KM_DELETE] ||*/ c == keymap[KM_CANCEL]) {
-                    /* ctrl-g terminates the search with no effect */
+                if (c == keymap[KM_CANCEL_SEARCH]) {
+                    /* terminates the search with no effect */
                     set_current(&l, "");
+                    l.prompt = prompt;
                     c = 0;
-                } else if (c == keymap[KM_CLEAR_SCREEN]) {
-                    /* ctrl-j terminates the search leaving the buffer in place */
+                } else if (c == keymap[KM_FINISH_SEARCH] || c == keymap[KM_ESC]) {
+                    /* terminates the search leaving the buffer in place */
+                    l.prompt = prompt;
                     c = 0;
                 }
                 /* Go process the char normally */
