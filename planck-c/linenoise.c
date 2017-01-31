@@ -1014,6 +1014,12 @@ static int linenoiseEdit(int stdin_fd, int stdout_fd, char *buf, size_t buflen, 
                         break;
                     }
                 }
+
+                if (!p && c >= ' ') {
+                    /* No match, so don't add it */
+                    rlen--;
+                    rbuf[rlen] = 0;
+                }
             }
 
             if (c == keymap[KM_CANCEL_SEARCH]) {
