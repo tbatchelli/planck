@@ -1026,7 +1026,7 @@ static int linenoiseEdit(int stdin_fd, int stdout_fd, char *buf, size_t buflen, 
                 set_current(&l, "");
                 l.pos = 0;
                 c = 0;
-            } else if (c == keymap[KM_FINISH_SEARCH] || c == keymap[KM_ESC]) {
+            } else if (c == keymap[KM_FINISH_SEARCH]) {
                 /* terminates the search leaving the buffer in place */
                 c = 0;
             }
@@ -1041,7 +1041,10 @@ static int linenoiseEdit(int stdin_fd, int stdout_fd, char *buf, size_t buflen, 
              * Use two calls to handle slow terminals returning the two
              * chars at different times. */
             if (read(l.ifd, seq, 1) != -1) {
-                if (read(l.ifd, seq + 1, 1) != -1) {
+                if (seq[0] != '[' && seq[0] != 'O') {
+                    c = seq[0];
+                    goto process_char;
+                } else if (read(l.ifd, seq + 1, 1) != -1) {
 
                     /* ESC [ sequences. */
                     if (seq[0] == '[') {
