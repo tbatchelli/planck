@@ -776,7 +776,7 @@ int isPasting() {
 static void set_current(struct linenoiseState *current, const char *str) {
     strncpy(current->buf, str, current->buflen);
     current->buf[current->buflen - 1] = 0;
-    current->len = current->pos = strlen(current->buf);
+    current->len = strlen(current->buf);
 }
 
 /* This function is the core of the line editing capability of linenoise.
@@ -902,7 +902,9 @@ static int linenoiseEdit(int stdin_fd, int stdout_fd, char *buf, size_t buflen, 
         }
 
         process_char:
-        if (c == keymap[KM_ENTER]) {
+        if (c == 0) {
+            continue;
+        } else if (c == keymap[KM_ENTER]) {
             history_len--;
             free(history[history_len]);
             if (mlmode) linenoiseEditMoveEnd(&l);
