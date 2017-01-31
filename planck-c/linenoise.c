@@ -961,7 +961,7 @@ static int linenoiseEdit(int stdin_fd, int stdout_fd, char *buf, size_t buflen, 
                 l.prompt = rprompt;
                 refreshLine(&l);
 
-                nread = read(l.ifd, &c, 1); // TODO check nread
+                read(l.ifd, &c, 1);
 
                 if (c == keymap[KM_BACKSPACE] || c == keymap[KM_DELETE]) {
                     if (rlen) {
@@ -970,7 +970,7 @@ static int linenoiseEdit(int stdin_fd, int stdout_fd, char *buf, size_t buflen, 
                     continue;
                 }
 
-                if (c == keymap[KM_HISTORY_PREVIOUS]) {
+                if (c == keymap[KM_REVERSE_I_SEARCH] || c == keymap[KM_HISTORY_PREVIOUS]) {
                     /* Search for the previous (earlier) match */
                     if (searchpos > 0) {
                         searchpos--;
@@ -984,7 +984,7 @@ static int linenoiseEdit(int stdin_fd, int stdout_fd, char *buf, size_t buflen, 
                     searchdir = 1;
                     skipsame = 1;
                 } else if (c >= ' ') {
-                    if (rlen >= (int) sizeof(rbuf) + 3) { // TODO understand
+                    if (rlen >= (int) sizeof(rbuf) - 1) {
                         continue;
                     }
 
@@ -1013,12 +1013,6 @@ static int linenoiseEdit(int stdin_fd, int stdout_fd, char *buf, size_t buflen, 
                         l.history_index = history_len - searchpos - 1;
                         break;
                     }
-                }
-
-                if (!p) {
-                    /* No match, so don't add it */
-                    rlen--;
-                    rbuf[rlen] = 0;
                 }
             }
 
