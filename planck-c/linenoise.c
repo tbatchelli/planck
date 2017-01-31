@@ -943,15 +943,14 @@ static int linenoiseEdit(int stdin_fd, int stdout_fd, char *buf, size_t buflen, 
         } else if (c == keymap[KM_REVERSE_I_SEARCH]) {
 
             /* Display the reverse-i-search prompt and process chars */
+
             char rbuf[50];
             char rprompt[80];
-            int rchars = 0;
             int rlen = 0;
             int searchpos = history_len - 1;
 
             rbuf[0] = 0;
             while (1) {
-                int n = 0;
                 const char *p = NULL;
                 int skipsame = 0;
                 int searchdir = -1;
@@ -959,15 +958,12 @@ static int linenoiseEdit(int stdin_fd, int stdout_fd, char *buf, size_t buflen, 
                 snprintf(rprompt, sizeof(rprompt), "(reverse-i-search)`%s': ", rbuf);
                 l.prompt = rprompt;
                 refreshLine(&l);
-                //was: c = fd_read(current);
-                nread = read(l.ifd, &c, 1);
-                // TODO check nread
-                if (/*c == ctrl('H') || */c == keymap[KM_DELETE]) {
-                    if (rchars) {
-                        // was: int p = utf8_index(rbuf, --rchars);
-                        int p = --rchars;
-                        rbuf[p] = 0;
-                        rlen = strlen(rbuf);
+
+                nread = read(l.ifd, &c, 1); // TODO check nread
+
+                if (c == keymap[KM_BACKSPACE] || c == keymap[KM_DELETE]) {
+                    if (rlen) {
+                        rbuf[--rlen] = 0;
                     }
                     continue;
                 }
@@ -986,15 +982,11 @@ static int linenoiseEdit(int stdin_fd, int stdout_fd, char *buf, size_t buflen, 
                     searchdir = 1;
                     skipsame = 1;
                 } else if (c >= ' ') {
-                    if (rlen >= (int) sizeof(rbuf) + 3) {
+                    if (rlen >= (int) sizeof(rbuf) + 3) { // TODO understand
                         continue;
                     }
 
-                    // was: n = utf8_getchars(rbuf + rlen, c);
-                    *(rbuf + rlen) = c;
-                    n = 1;
-                    rlen += n;
-                    rchars++;
+                    rbuf[rlen++] = c;
                     rbuf[rlen] = 0;
 
                     /* Adding a new char resets the search location */
@@ -1015,18 +1007,18 @@ static int linenoiseEdit(int stdin_fd, int stdout_fd, char *buf, size_t buflen, 
                         }
                         /* Copy the matching line and set the cursor position */
                         set_current(&l, history[searchpos]);
-                        // was: current->pos = utf8_strlen(history[searchpos], p - history[searchpos]);
                         l.pos = p - history[searchpos];
                         break;
                     }
                 }
-                if (!p && n) {
+
+                if (!p) {
                     /* No match, so don't add it */
-                    rchars--;
-                    rlen -= n;
+                    rlen--;
                     rbuf[rlen] = 0;
                 }
             }
+
             if (c == keymap[KM_CANCEL_SEARCH]) {
                 /* terminates the search with no effect */
                 set_current(&l, "");
@@ -1037,6 +1029,7 @@ static int linenoiseEdit(int stdin_fd, int stdout_fd, char *buf, size_t buflen, 
                 l.prompt = prompt;
                 c = 0;
             }
+
             /* Go process the char normally */
             refreshLine(&l);
             goto process_char;
