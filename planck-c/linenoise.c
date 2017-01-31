@@ -1010,6 +1010,7 @@ static int linenoiseEdit(int stdin_fd, int stdout_fd, char *buf, size_t buflen, 
                         /* Copy the matching line and set the cursor position */
                         set_current(&l, history[searchpos]);
                         l.pos = p - history[searchpos];
+                        l.history_index = history_len - searchpos - 1;
                         break;
                     }
                 }
