@@ -1024,15 +1024,15 @@ static int linenoiseEdit(int stdin_fd, int stdout_fd, char *buf, size_t buflen, 
             if (c == keymap[KM_CANCEL_SEARCH]) {
                 /* terminates the search with no effect */
                 set_current(&l, "");
-                l.prompt = prompt;
+                l.pos = 0;
                 c = 0;
             } else if (c == keymap[KM_FINISH_SEARCH] || c == keymap[KM_ESC]) {
                 /* terminates the search leaving the buffer in place */
-                l.prompt = prompt;
                 c = 0;
             }
 
             /* Go process the char normally */
+            l.prompt = prompt;
             refreshLine(&l);
             goto process_char;
 
