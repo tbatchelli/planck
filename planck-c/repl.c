@@ -8,6 +8,9 @@
 #include<sys/socket.h>
 #include<arpa/inet.h>
 
+/* musl */
+#include <sys/select.h>
+
 #include "linenoise.h"
 
 #include "engine.h"
@@ -16,9 +19,6 @@
 #include "str.h"
 #include "theme.h"
 #include "timers.h"
-
-/* musl */
-#include <sys/select.h>
 
 struct repl {
     char *current_ns;
