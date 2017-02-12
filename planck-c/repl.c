@@ -17,6 +17,9 @@
 #include "theme.h"
 #include "timers.h"
 
+/* musl */
+#include <sys/select.h>
+
 struct repl {
     char *current_ns;
     char *current_prompt;
